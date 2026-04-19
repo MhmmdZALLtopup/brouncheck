@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRO UNCHEK V10 - SUPREME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+        
+        :root {
+            --primary-blue: #2563eb;
+            --dark-bg: #000000;
+            --glass-bg: rgba(18, 18, 18, 0.8);
+            --gmail-red: #ea4335;
+        }
+
+        body { 
+            background: var(--dark-bg); 
+            color: #ffffff; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow: hidden; 
+            height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism UI */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 40px;
+        }
+
+        .cyber-input {
+            background: #0a0a0a !important;
+            border: 2px solid #1a1a1a !important;
+            color: #fff !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cyber-input:focus {
+            border-color: var(--primary-blue) !important;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Gmail Interface Styles */
+        .gmail-container {
+            background: #f6f8fc;
+            color: #1f1f1f;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mail-item {
+            background: #ffffff;
+            margin: 8px 16px;
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+            border: 1px solid #f1f3f4;
+            display: flex;
+            align-items: center;
+        }
+
+        .mail-item:active {
+            background: #e8f0fe;
+            transform: scale(0.96);
+        }
+
+        .avatar-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        /* Animation */
+        .nav-active { color: var(--primary-blue) !important; position: relative; }
+        .nav-active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+        }
+
+        /* Maintenance Screen */
+        #mt-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mt-screen">
+        <div class="animate__animated animate__zoomIn">
+            <div class="relative inline-block mb-8">
+                <i class="fas fa-shield-virus text-7xl text-blue-600"></i>
+                <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full animate-ping"></div>
+            </div>
+            <h1 class="text-4xl font-black italic tracking-tighter">SERVER DOWN</h1>
+            <p class="text-zinc-500 mt-4 max-w-xs mx-auto font-medium">BroJJ sedang melakukan maintenance rutin. Silahkan kembali nanti.</p>
+        </div>
+    </div>
+
+    <div id="login-screen" class="fixed inset-0 z-[1000] bg-black overflow-y-auto px-8 py-16">
+        <div class="max-w-md mx-auto space-y-12">
+            
+            <div class="text-center space-y-2 animate__animated animate__fadeInDown">
+                <div class="inline-block p-4 bg-blue-600/10 rounded-[2.5rem] mb-4">
+                    <i class="fas fa-bolt text-4xl text-blue-600"></i>
+                </div>
+                <h1 class="text-5xl font-black italic tracking-tighter">BRO UNCHEK <span class="text-blue-600">V10</span></h1>
+                <p class="text-[10px] text-zinc-600 font-bold tracking-[0.5em] uppercase">Private Supreme Access</p>
+                
+                <div onclick="copyMyID()" class="mt-8 inline-flex items-center gap-4 bg-zinc-900/50 border border-zinc-800 px-6 py-3 rounded-full cursor-pointer hover:bg-zinc-800 transition-all">
+                    <span class="text-[9px] font-black text-zinc-500 uppercase">Device ID:</span>
+                    <span id="display-hwid" class="text-xs font-mono font-bold text-blue-500 tracking-wider">...</span>
+                </div>
+            </div>
+
+            <div id="push-notif" class="hidden bg-gradient-to-br from-blue-600 to-indigo-800 p-6 rounded-[3rem] shadow-2xl shadow-blue-900/40 animate__animated animate__bounceIn">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-white text-xl">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[10px] font-black uppercase text-blue-200 tracking-widest">Key Dikirim Owner!</p>
+                        <p id="push-key-val" class="text-xl font-black font-mono text-white tracking-widest">BRO-XXXX</p>
+                    </div>
+                    <button onclick="autoLogin()" class="bg-white text-blue-700 px-6 py-3 rounded-2xl text-[11px] font-black uppercase shadow-lg active:scale-90 transition-transform">Claim</button>
+                </div>
+            </div>
+
+            <div class="glass-card p-3 animate__animated animate__fadeInUp">
+                <div class="flex p-2 gap-2 mb-4">
+                    <button id="btn-tab-login" onclick="switchTab('login')" class="flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase tracking-widest transition-all bg-white text-black">Login</button>
+                    <button id="btn-tab-store" onclick="switchTab('store')" class="flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase tracking-widest transition-all text-zinc-500">Store</button>
+                </div>
+
+                <div id="view-login" class="p-6 space-y-6">
+                    <div class="relative">
+                        <input type="text" id="license-input" placeholder="BRO-XXXXXXXX" class="cyber-input w-full p-6 rounded-[2.5rem] text-center font-mono font-bold uppercase text-xl tracking-[5px]">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black px-4 py-1 rounded-full border border-zinc-800">
+                            <span class="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em]">Masukan Key</span>
+                        </div>
+                    </div>
+                    <button onclick="processLogin()" class="w-full bg-blue-600 hover:bg-blue-700 py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/30 active:scale-95 transition-all">
+                        Open Database
+                    </button>
+                    <p class="text-center text-[9px] text-zinc-600 font-bold uppercase italic">No Key? Check Store Tab</p>
+                </div>
+
+                <div id="view-store" class="hidden p-6 space-y-4">
+                    <div class="grid grid-cols-1 gap-3">
+                        <div onclick="orderPackage('1 Jam', '2.000')" class="flex justify-between items-center bg-zinc-900/50 border border-zinc-800 p-6 rounded-[2rem] active:bg-blue-600 group transition-all">
+                            <div><p class="text-lg font-black italic">ULTIMATE 1H</p><p class="text-[10px] font-bold text-zinc-500 group-active:text-white">Full Database Access</p></div>
+                            <div class="text-right"><p class="text-xl font-black text-blue-500 group-active:text-white">Rp 2K</p></div>
+                        </div>
+                        <div onclick="orderPackage('Permanent', '50.000')" class="flex justify-between items-center bg-zinc-900/50 border border-zinc-800 p-6 rounded-[2rem] active:bg-blue-600 group transition-all">
+                            <div><p class="text-lg font-black italic">ETERNAL ACCESS</p><p class="text-[10px] font-bold text-zinc-500 group-active:text-white">Life-time Warranty</p></div>
+                            <div class="text-right"><p class="text-xl font-black text-blue-500 group-active:text-white">Rp 50K</p></div>
+                        </div>
+                    </div>
+                    <button onclick="window.open('https://wa.me/6283821914043')" class="w-full p-4 text-[10px] font-black text-blue-400 uppercase tracking-widest">Contact Owner for Custom Order</button>
+                </div>
+            </div>
+            
+            <p class="text-center text-[9px] text-zinc-800 font-black tracking-[0.5em] uppercase">Secured by BroJJ Encryption</p>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden gmail-container">
+        <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0">
+            <div class="flex items-center gap-4">
+                <i class="fas fa-bars text-gray-400 text-xl"></i>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" class="w-7">
+                <span class="text-xl font-bold text-gray-700 tracking-tight">Gmail <span class="text-xs font-black text-blue-600 ml-1">V10</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="session-timer" class="bg-black text-white px-5 py-2.5 rounded-full font-mono font-bold text-xs tracking-wider shadow-lg">00:00:00</div>
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-black text-sm shadow-md">B</div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto custom-scroll pb-32">
+            <div class="px-7 py-6 flex justify-between items-center">
+                <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Kotak Masuk Terbaru</p>
+                <div class="flex gap-4 text-gray-400">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-filter"></i>
+                </div>
+            </div>
+
+            <div id="inbox-render" class="space-y-1">
+                </div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 h-24 bg-white/90 backdrop-blur-md border-t border-gray-100 flex justify-around items-center px-6 z-[200]">
+            <div class="flex flex-col items-center nav-active">
+                <i class="fas fa-envelope text-xl"></i>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Email</span>
+            </div>
+            <div class="flex flex-col items-center text-gray-300">
+                <i class="fas fa-video text-xl"></i>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Meet</span>
+            </div>
+            
+            <div class="relative -mt-12">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-blue-500/40 border-[6px] border-white active:scale-90 transition-transform">
+                    <i class="fas fa-pen-nib text-xl"></i>
+                </div>
+            </div>
+
+            <div onclick="chatOwner()" class="flex flex-col items-center text-green-500 group">
+                <i class="fab fa-whatsapp text-2xl group-active:scale-125 transition-all"></i>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Chat</span>
+            </div>
+            
+            <div onclick="forceExit()" class="flex flex-col items-center text-red-500">
+                <i class="fas fa-power-off text-xl"></i>
+                <span class="text-[10px] font-bold mt-1 uppercase tracking-tighter">Exit</span>
+            </div>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        // CONFIG DATABASE
+        const firebaseConfig = { databaseURL: "https://kodangz-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // -- STATE MANAGEMENT --
+        let LOGGED_SESSION = false;
+        let NOTIF_SENT = false; // Flag for 50s notification
+        const myID = localStorage.getItem('v10_hwid') || 'BR-' + Math.random().toString(36).substr(2,8).toUpperCase();
+        localStorage.setItem('v10_hwid', myID);
+        document.getElementById('display-hwid').innerText = myID;
+
+        // -- CORE UI LOGIC --
+        window.switchTab = (t) => {
+            const isLogin = t === 'login';
+            document.getElementById('view-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('view-store').classList.toggle('hidden', isLogin);
+            document.getElementById('btn-tab-login').className = isLogin ? 'flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase bg-white text-black' : 'flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase text-zinc-500';
+            document.getElementById('btn-tab-store').className = !isLogin ? 'flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase bg-white text-black' : 'flex-1 py-4 rounded-[30px] text-[10px] font-black uppercase text-zinc-500';
+        };
+
+        window.copyMyID = () => {
+            navigator.clipboard.writeText(myID);
+            Swal.fire({ icon: 'success', title: 'ID DISALIN', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
+        };
+
+        window.chatOwner = () => {
+            const msg = encodeURIComponent(`Halo Owner BroJJ, saya user dengan ID: ${myID}. Ingin bertanya sesuatu.`);
+            window.open(`https://wa.me/6283821914043?text=${msg}`);
+        };
+
+        window.orderPackage = (p, h) => {
+            const orderID = 'ORD-' + Date.now();
+            set(ref(db, `orders/${orderID}`), { package: p, price: h, device: myID, timestamp: Date.now() });
+            window.open(`https://wa.me/6283821914043?text=Halo%20Owner%20BroJJ,%20Saya%20mau%20beli%20paket%20${p}%20harga%20${h}.%20ID%20Saya:%20${myID}`);
+        };
+
+        // -- AUTO KEY NOTIFICATION --
+        onValue(ref(db, `devices/${myID}/assignedKey`), snap => {
+            if(snap.exists() && !LOGGED_SESSION) {
+                const key = snap.val();
+                document.getElementById('push-notif').classList.remove('hidden');
+                document.getElementById('push-key-val').innerText = key;
+                window.autoLogin = () => {
+                    document.getElementById('license-input').value = key;
+                    processLogin();
+                    set(ref(db, `devices/${myID}/assignedKey`), null);
+                };
+            } else {
+                document.getElementById('push-notif').classList.add('hidden');
+            }
+        });
+
+        // -- LOGIN ENGINE --
+        window.processLogin = async () => {
+            if(LOGGED_SESSION) return; // Prevent loop
+
+            const inputKey = document.getElementById('license-input').value.trim().toUpperCase();
+            if(!inputKey) return Swal.fire('Error', 'Masukan Key Lisensi!', 'error');
+
+            // Super Admin Bypass
+            if(inputKey === "AD-BROJJ") return startApp(null, true, {});
+
+            Swal.fire({ 
+                title: 'Verifying License...', 
+                html: 'Menghubungkan ke secure server...',
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
+
+            try {
+                const keySnap = await get(ref(db, `keys/${inputKey}`));
+                if(keySnap.exists()){
+                    const data = keySnap.val();
+
+                    // Security: Binding Check
+                    if(data.boundDevice && data.boundDevice !== myID) {
+                        Swal.close();
+                        return Swal.fire('ACCESS DENIED', 'Key ini sudah terkunci di perangkat lain!', 'error');
+                    }
+
+                    // Calculate Expiry
+                    let expireTime = data.expiresAt || (Date.now() + (data.hours * 3600000) + (data.minutes * 60000));
+                    
+                    // Update Lock
+                    LOGGED_SESSION = true;
+                    await update(ref(db, `keys/${inputKey}`), { 
+                        boundDevice: myID, 
+                        expiresAt: expireTime, 
+                        status: 'in-use' 
+                    });
+
+                    // Anti-Delete Listener
+                    onValue(ref(db, `keys/${inputKey}`), s => { if(!s.exists()) location.reload(); });
+
+                    Swal.close();
+                    startApp(expireTime, false, data.inbox || {});
+                } else {
+                    Swal.close();
+                    Swal.fire('INVALID', 'Key tidak ditemukan atau sudah expired.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('DATABASE ERROR', 'Gagal koneksi ke Firebase.', 'error');
+            }
+        };
+
+        function startApp(expiry, isAdmin, accounts) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            // --- TIMER ENGINE WITH 50S NOTIF ---
+            if(expiry) {
+                const timerInt = setInterval(() => {
+                    const now = Date.now();
+                    const diff = expiry - now;
+
+                    if(diff <= 0) {
+                        clearInterval(timerInt);
+                        location.reload();
+                    }
+
+                    // PERMINTAAN USER: Notif di 50 detik terakhir
+                    if(diff <= 50000 && diff > 48000 && !NOTIF_SENT) {
+                        NOTIF_SENT = true;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Peringatan Waktu!',
+                            text: 'Waktu anda tersisa 1 menit!', // Sesuai permintaan user
+                            confirmButtonColor: '#2563eb',
+                            timer: 5000
+                        });
+                        // Audio Notif (Optional)
+                        const audio = new Audio('https://www.soundjay.com/buttons/beep-07a.mp3');
+                        audio.play();
+                    }
+
+                    const h = Math.floor(diff / 3600000).toString().padStart(2,'0');
+                    const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+                    const s = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
+                    document.getElementById('session-timer').innerText = `${h}:${m}:${s}`;
+                }, 1000);
+            } else {
+                document.getElementById('session-timer').innerText = "UNLIMITED";
+            }
+
+            // --- RENDER GMAIL INBOX ---
+            const renderArea = document.getElementById('inbox-render');
+            renderArea.innerHTML = '';
+            
+            const keys = Object.keys(accounts);
+            if(keys.length === 0) {
+                renderArea.innerHTML = `<div class="p-20 text-center opacity-20"><i class="fas fa-folder-open text-6xl mb-4"></i><p class="font-bold uppercase tracking-widest text-xs">Kosong</p></div>`;
+            }
+
+            const colors = ['#4285f4', '#34a853', '#fbbc05', '#ea4335', '#673ab7', '#e91e63'];
+
+            keys.reverse().forEach((id, index) => {
+                const acc = accounts[id];
+                const color = colors[index % colors.length];
+                
+                const itemHtml = `
+                    <div onclick="openMail('${acc.email}', '${acc.pw}')" class="mail-item animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.05}s">
+                        <div class="avatar-circle" style="background: ${color}20; color: ${color}">${acc.label[0]}</div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="text-[13px] font-extrabold text-gray-800 tracking-tight">${acc.label}</span>
+                                <span class="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full uppercase">Verified</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 truncate font-medium">${acc.email}</p>
+                            <div class="flex gap-2 mt-1.5">
+                                <span class="text-[8px] font-black uppercase text-gray-400 border border-gray-100 px-1.5 rounded">${acc.city || 'INDONESIA'}</span>
+                                <span class="text-[8px] font-black uppercase text-gray-400 border border-gray-100 px-1.5 rounded">${acc.isp || 'PROVIDER'}</span>
+                            </div>
+                        </div>
+                        <i class="far fa-star text-gray-300 ml-4"></i>
+                    </div>
+                `;
+                renderArea.innerHTML += itemHtml;
+            });
+        }
+
+        window.openMail = (e, p) => {
+            Swal.fire({
+                title: 'GMAIL CREDENTIALS',
+                html: `
+                    <div class="text-left space-y-4">
+                        <div class="p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
+                            <p class="font-bold text-gray-800 select-all">${e}</p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-2xl border border-dashed border-red-100">
+                            <p class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">Password</p>
+                            <p class="font-mono text-xl font-black text-red-600 select-all">${p}</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'SALIN SEMUA',
+                confirmButtonColor: '#2563eb',
+                cancelButtonText: 'Tutup'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    navigator.clipboard.writeText(`Email: ${e} | PW: ${p}`);
+                    Swal.fire({ icon: 'success', title: 'Data Disalin!', toast: true, position: 'top', showConfirmButton: false, timer: 1000 });
+                }
+            });
+        };
+
+        // MAINTENANCE CHECK
+        onValue(ref(db, 'system/maintenance'), s => {
+            if(s.val() === true) document.getElementById('mt-screen').style.display = 'flex';
+            else document.getElementById('mt-screen').style.display = 'none';
+        });
+
+        window.forceExit = () => {
+            Swal.fire({
+                title: 'Logout?',
+                text: "Sesi anda akan dihentikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444'
+            }).then(r => { if(r.isConfirmed) location.reload(); });
+        };
+
+        window.addEventListener('online', () => update(ref(db, `devices/${myID}`), { status: 'online' }));
+        window.addEventListener('offline', () => update(ref(db, `devices/${myID}`), { status: 'offline' }));
+
+    </script>
+</body>
+</html>
