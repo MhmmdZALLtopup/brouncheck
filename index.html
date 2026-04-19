@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRO UNCHEK V11 - ELITE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        :root { --brand: #3b82f6; --bg: #050505; --surface: #121212; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; -webkit-tap-highlight-color: transparent; }
+        
+        .glass { background: rgba(18, 18, 18, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .input-neo { background: #0a0a0a; border: 2px solid #1f1f1f; color: #fff; transition: 0.3s; }
+        .input-neo:focus { border-color: var(--brand); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+        
+        .mail-row { background: #fff; color: #000; margin: 8px 16px; padding: 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.2s; }
+        .mail-row:active { transform: scale(0.96); }
+        
+        /* Chat Panel Setup */
+        #chat-panel { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #chat-panel.active { transform: translateY(0); }
+        .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 13px; line-height: 1.4; word-wrap: break-word; }
+        .chat-user { background: var(--brand); color: white; border-bottom-right-radius: 4px; margin-left: auto; }
+        .chat-admin { background: #27272a; color: white; border-bottom-left-radius: 4px; border: 1px solid #3f3f46; margin-right: auto; }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="mt-screen" class="fixed inset-0 z-[9999] bg-black hidden flex-col items-center justify-center text-center p-6">
+        <i class="fas fa-server text-6xl text-blue-600 mb-6 animate-pulse"></i>
+        <h1 class="text-3xl font-bold tracking-tight">SERVER MAINTENANCE</h1>
+        <p class="text-zinc-500 mt-2">BroJJ sedang meningkatkan sistem.</p>
+    </div>
+
+    <div id="chat-panel" class="fixed inset-0 z-[5000] bg-black/90 backdrop-blur-xl flex flex-col">
+        <div class="h-20 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-950">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center"><i class="fas fa-user-shield text-white"></i></div>
+                <div>
+                    <h2 class="font-bold text-sm">BroJJ Support</h2>
+                    <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse"></span> Online</p>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-400 active:scale-90"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll flex flex-col">
+            <div class="text-center text-[10px] text-zinc-600 font-bold uppercase tracking-widest my-4">Chat Secured & Encrypted</div>
+            </div>
+
+        <div class="p-4 bg-zinc-950 border-t border-zinc-800">
+            <div class="flex gap-2">
+                <input type="text" id="chat-input" placeholder="Ketik pesan ke admin..." class="input-neo flex-1 p-4 rounded-2xl text-sm" onkeypress="if(event.key === 'Enter') sendChat()">
+                <button onclick="sendChat()" class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white active:scale-90 transition-transform"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="landing" class="fixed inset-0 z-[1000] bg-black overflow-y-auto px-6 py-12">
+        <div class="max-w-md mx-auto space-y-8">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold tracking-tighter">V11 <span class="text-blue-600 font-black">ELITE</span></h1>
+                <p class="text-[10px] text-zinc-500 font-bold tracking-[4px] uppercase mt-2">Database Access Portal</p>
+                <div class="mt-6 inline-flex bg-zinc-900 border border-zinc-800 px-5 py-2 rounded-full">
+                    <span class="text-[9px] font-bold text-zinc-500 uppercase mr-2">ID:</span>
+                    <span id="hwid-display" class="text-xs font-mono font-bold text-blue-500">...</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 bg-zinc-900/50 p-1.5 rounded-[2rem] border border-zinc-800">
+                <button id="tab-login" onclick="switchMainTab('login')" class="flex-1 py-3.5 rounded-[1.5rem] bg-blue-600 text-white text-xs font-bold uppercase tracking-wider transition-all">Login</button>
+                <button id="tab-store" onclick="switchMainTab('store')" class="flex-1 py-3.5 rounded-[1.5rem] text-zinc-500 text-xs font-bold uppercase tracking-wider transition-all">Store</button>
+            </div>
+
+            <div id="view-login" class="glass p-6 rounded-[2rem] space-y-5 animate__animated animate__fadeIn">
+                <input type="text" id="k-input" placeholder="BRO-XXXXXXXX" class="input-neo w-full p-6 rounded-[1.5rem] text-center font-mono font-bold uppercase text-lg">
+                <button onclick="doLogin()" class="w-full bg-blue-600 py-5 rounded-[1.5rem] font-bold text-xs uppercase tracking-widest active:scale-95 transition-transform">Unlock Database</button>
+                <button onclick="toggleChat()" class="w-full bg-zinc-900 border border-zinc-800 py-4 rounded-[1.5rem] font-bold text-[10px] text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2"><i class="fas fa-headset"></i> Live Chat Admin</button>
+            </div>
+
+            <div id="view-store" class="hidden space-y-3 animate__animated animate__fadeIn">
+                <div class="grid grid-cols-2 gap-3">
+                    <div onclick="reqOrder('1 Jam', '2K')" class="glass p-5 rounded-3xl active:border-blue-500 transition-all text-center">
+                        <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Paket</p><p class="text-lg font-black">1 JAM</p><p class="text-blue-500 font-bold mt-2">Rp 2.000</p>
+                    </div>
+                    <div onclick="reqOrder('3 Jam', '5K')" class="glass p-5 rounded-3xl active:border-blue-500 transition-all text-center">
+                        <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Paket</p><p class="text-lg font-black">3 JAM</p><p class="text-blue-500 font-bold mt-2">Rp 5.000</p>
+                    </div>
+                    <div onclick="reqOrder('6 Jam', '8K')" class="glass p-5 rounded-3xl active:border-blue-500 transition-all text-center">
+                        <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Paket</p><p class="text-lg font-black">6 JAM</p><p class="text-blue-500 font-bold mt-2">Rp 8.000</p>
+                    </div>
+                    <div onclick="reqOrder('12 Jam', '12K')" class="glass p-5 rounded-3xl active:border-blue-500 transition-all text-center">
+                        <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest mb-1">Paket</p><p class="text-lg font-black">12 JAM</p><p class="text-blue-500 font-bold mt-2">Rp 12.000</p>
+                    </div>
+                </div>
+                <div onclick="reqOrder('24 Jam', '20K')" class="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 p-5 rounded-3xl active:scale-95 transition-all flex justify-between items-center">
+                    <div><p class="text-xs text-blue-400 font-bold uppercase tracking-widest mb-1">Full Day</p><p class="text-xl font-black">24 JAM</p></div><p class="text-blue-500 font-bold text-lg">Rp 20.000</p>
+                </div>
+                <div onclick="reqOrder('Permanent', '50K')" class="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 p-5 rounded-3xl active:scale-95 transition-all flex justify-between items-center">
+                    <div><p class="text-xs text-yellow-400 font-bold uppercase tracking-widest mb-1">VVIP Access</p><p class="text-xl font-black">PERMANENT</p></div><p class="text-yellow-500 font-bold text-lg">Rp 50.000</p>
+                </div>
+                <button onclick="toggleChat()" class="w-full mt-4 bg-zinc-900 p-4 rounded-2xl text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tanya Admin Dulu?</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="hidden bg-[#f6f8fc] h-screen flex flex-col text-black">
+        <header class="h-20 bg-white flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
+            <div class="flex items-center gap-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" class="w-7">
+                <span class="text-xl font-bold text-gray-700">Inbox</span>
+            </div>
+            <div id="timer-badge" class="bg-black text-white px-4 py-2 rounded-xl font-mono font-bold text-xs">00:00:00</div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto pb-24 custom-scroll">
+            <div class="px-6 py-5 flex justify-between items-center">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Primary Database</p>
+                <i class="fas fa-filter text-gray-400"></i>
+            </div>
+            <div id="inbox-list" class="space-y-1"></div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-200 flex justify-around items-center px-6 z-20">
+            <div class="flex flex-col items-center text-blue-600"><i class="fas fa-inbox text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Inbox</span></div>
+            <div onclick="toggleChat()" class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition-colors relative">
+                <i class="fas fa-comment-dots text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Support</span>
+                <div id="chat-badge" class="hidden absolute -top-1 -right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+            </div>
+            <div onclick="location.reload()" class="flex flex-col items-center text-red-500"><i class="fas fa-sign-out-alt text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Logout</span></div>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, update, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://kodangz-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // State Init
+        const myID = localStorage.getItem('v11_id') || 'DEV-' + Math.random().toString(36).substr(2,6).toUpperCase();
+        localStorage.setItem('v11_id', myID);
+        document.getElementById('hwid-display').innerText = myID;
+        let IS_AUTH = false;
+        let NOTIF_TRIGGERED = false;
+
+        // UI Tabs
+        window.switchMainTab = (tab) => {
+            document.getElementById('view-login').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('view-store').style.display = tab === 'store' ? 'block' : 'none';
+            document.getElementById('tab-login').className = tab === 'login' ? 'flex-1 py-3.5 rounded-[1.5rem] bg-blue-600 text-white text-xs font-bold uppercase tracking-wider' : 'flex-1 py-3.5 rounded-[1.5rem] bg-transparent text-zinc-500 text-xs font-bold uppercase tracking-wider';
+            document.getElementById('tab-store').className = tab === 'store' ? 'flex-1 py-3.5 rounded-[1.5rem] bg-blue-600 text-white text-xs font-bold uppercase tracking-wider' : 'flex-1 py-3.5 rounded-[1.5rem] bg-transparent text-zinc-500 text-xs font-bold uppercase tracking-wider';
+        };
+
+        // Chat Logic
+        window.toggleChat = () => {
+            const panel = document.getElementById('chat-panel');
+            panel.classList.toggle('active');
+            document.getElementById('chat-badge').classList.add('hidden');
+            if(panel.classList.contains('active')) setTimeout(() => {
+                const box = document.getElementById('chat-box');
+                box.scrollTop = box.scrollHeight;
+            }, 100);
+        };
+
+        window.sendChat = () => {
+            const inp = document.getElementById('chat-input');
+            const txt = inp.value.trim();
+            if(!txt) return;
+            push(ref(db, `chats/${myID}`), { sender: 'user', text: txt, time: Date.now() });
+            inp.value = '';
+            
+            // Auto update device status to notify admin
+            update(ref(db, `devices/${myID}`), { lastChat: Date.now(), unreadAdmin: true });
+        };
+
+        // Listen Chats
+        onValue(ref(db, `chats/${myID}`), snap => {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = '<div class="text-center text-[10px] text-zinc-600 font-bold uppercase tracking-widest my-4">Chat Secured & Encrypted</div>';
+            if(snap.exists()) {
+                const msgs = snap.val();
+                let lastSender = '';
+                Object.values(msgs).forEach(m => {
+                    const isMe = m.sender === 'user';
+                    box.innerHTML += `
+                        <div class="flex flex-col w-full ${isMe ? 'items-end' : 'items-start'} animate__animated animate__fadeInUp animate__faster">
+                            ${!isMe && lastSender !== 'admin' ? '<span class="text-[9px] text-zinc-500 font-bold ml-1 mb-1">Admin BroJJ</span>' : ''}
+                            <div class="chat-bubble ${isMe ? 'chat-user' : 'chat-admin'}">${m.text}</div>
+                            <span class="text-[8px] text-zinc-600 mt-1 ${isMe ? 'mr-1' : 'ml-1'}">${new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    `;
+                    lastSender = m.sender;
+                    // Trigger badge if closed and msg from admin
+                    if(!isMe && !document.getElementById('chat-panel').classList.contains('active')) {
+                        document.getElementById('chat-badge').classList.remove('hidden');
+                        if(IS_AUTH) new Audio('https://www.soundjay.com/buttons/button-09.mp3').play().catch(()=>{});
+                    }
+                });
+                box.scrollTop = box.scrollHeight;
+            }
+        });
+
+        // Store Order Auto-Chat
+        window.reqOrder = (paket, harga) => {
+            push(ref(db, `chats/${myID}`), { 
+                sender: 'user', 
+                text: `Halo Admin, saya mau beli paket ${paket} (${harga}). Apakah ready?`, 
+                time: Date.now() 
+            });
+            update(ref(db, `devices/${myID}`), { lastChat: Date.now(), unreadAdmin: true });
+            toggleChat();
+        };
+
+        // MT Check
+        onValue(ref(db, 'system/maintenance'), s => {
+            document.getElementById('mt-screen').style.display = s.val() ? 'flex' : 'none';
+        });
+
+        // Auto Login Push
+        onValue(ref(db, `devices/${myID}/assignedKey`), s => {
+            if(s.exists() && !IS_AUTH) {
+                document.getElementById('k-input').value = s.val();
+                doLogin();
+                set(ref(db, `devices/${myID}/assignedKey`), null);
+            }
+        });
+
+        // Login Logic (Anti Loop)
+        window.doLogin = async () => {
+            if(IS_AUTH) return;
+            const key = document.getElementById('k-input').value.trim().toUpperCase();
+            if(!key) return;
+
+            Swal.fire({ title: 'Decrypting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            try {
+                const snap = await get(ref(db, `keys/${key}`));
+                if(!snap.exists()) return Swal.fire('Error', 'Key Invalid', 'error');
+                
+                const d = snap.val();
+                if(d.boundDevice && d.boundDevice !== myID) return Swal.fire('Error', 'Key locked to other device', 'error');
+
+                let exp = d.expiresAt || (Date.now() + (d.hours * 3600000) + (d.minutes * 60000));
+                IS_AUTH = true;
+                await update(ref(db, `keys/${key}`), { boundDevice: myID, expiresAt: exp, status: 'active' });
+                
+                // Anti Delete
+                onValue(ref(db, `keys/${key}`), s => { if(!s.exists()) location.reload(); });
+                
+                Swal.close();
+                start(exp, d.inbox || {});
+            } catch(e) { Swal.fire('Error', 'Network Error', 'error'); }
+        };
+
+        function start(exp, data) {
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+
+            // Timer + 50s Notif
+            setInterval(() => {
+                const diff = exp - Date.now();
+                if(diff <= 0) location.reload();
+                
+                // NOTIF 50 DETIK TERAKHIR
+                if(diff <= 50000 && diff > 48000 && !NOTIF_TRIGGERED) {
+                    NOTIF_TRIGGERED = true;
+                    Swal.fire({ icon: 'warning', title: 'Waktu Hampir Habis!', text: 'Waktu anda tersisa 1 menit. Segera perpanjang via Chat Admin.', timer: 6000 });
+                }
+
+                const h = Math.floor(diff / 3600000).toString().padStart(2,'0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
+                document.getElementById('timer-badge').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+
+            // Render Inbox
+            const list = document.getElementById('inbox-list');
+            list.innerHTML = '';
+            Object.values(data).forEach((a, i) => {
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const c = colors[i % colors.length];
+                list.innerHTML += `
+                    <div onclick="copyMail('${a.email}', '${a.pw}')" class="mail-row flex items-center">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-lg mr-4" style="background: ${c}">${a.label[0]}</div>
+                        <div class="flex-1 overflow-hidden">
+                            <h3 class="text-[13px] font-bold text-gray-800">${a.label}</h3>
+                            <p class="text-[11px] text-gray-500 truncate">${a.email}</p>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.copyMail = (e, p) => {
+            Swal.fire({
+                title: 'Data Akun',
+                html: `<div class="text-left"><p class="text-xs text-gray-400">Email</p><p class="font-bold mb-2">${e}</p><p class="text-xs text-gray-400">Pass</p><p class="font-mono text-lg text-red-500 font-bold">${p}</p></div>`,
+                confirmButtonText: 'Salin', confirmButtonColor: '#3b82f6'
+            }).then(r => { if(r.isConfirmed) navigator.clipboard.writeText(`${e}:${p}`); });
+        };
+    </script>
+</body>
+</html>
