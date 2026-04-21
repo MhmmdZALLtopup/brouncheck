@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V15 ELITE CLIENT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+        :root { --primary: #3b82f6; --bg: #030303; --card: #0a0a0c; --border: #1e293b; }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #e4e4e7; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+        
+        .elite-gradient { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+        .glass-dark { background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(16px); border: 1px solid var(--border); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+        .tab-active { background: var(--primary); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:active { transform: scale(0.96); border-color: var(--primary); }
+        
+        .custom-scroll::-webkit-scrollbar { display: none; } /* Hide scrollbar for clean UI */
+        
+        /* Particle Background for Portal */
+        .bg-grid { background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 30px 30px; }
+        
+        /* Anti-Inspect / Anti-Select (Opsional) */
+        .noselect { user-select: none; -webkit-user-select: none; }
+        
+        /* Fix Chat Overlay */
+        .chat-open { transform: translateY(0) !important; }
+    </style>
+</head>
+<body class="h-screen flex flex-col noselect relative">
+
+    <div id="loading-overlay" class="fixed inset-0 z-[9999] bg-[#030303] flex items-center justify-center hidden">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin mx-auto mb-6 shadow-[0_0_15px_#3b82f6]"></div>
+            <h2 class="text-lg font-black tracking-[0.3em] text-white animate-pulse uppercase">Decrypting...</h2>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="fixed inset-0 z-[1000] bg-[#030303] bg-grid flex flex-col items-center justify-center px-6">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent pointer-events-none"></div>
+        <div class="w-full max-w-sm relative z-10 animate__animated animate__fadeIn">
+            
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-[#0a0a0c] border border-slate-800 rounded-3xl flex items-center justify-center text-4xl text-blue-500 mx-auto mb-6 shadow-2xl shadow-blue-500/10"><i class="fas fa-shield-halved"></i></div>
+                <h1 class="text-4xl font-black italic tracking-tighter text-white mb-2">V15 <span class="text-blue-500">ELITE</span></h1>
+                <p class="text-[9px] uppercase tracking-[0.4em] text-slate-500 font-bold mb-4">Database Access Portal</p>
+                <div class="bg-slate-900/50 border border-slate-800 rounded-full py-1.5 px-5 inline-block">
+                    <span class="text-[10px] font-mono text-blue-400 font-bold">ID: <span id="hwid-display">...</span></span>
+                </div>
+            </div>
+
+            <div class="glass-dark p-1.5 rounded-2xl flex mb-8">
+                <button onclick="switchPortal('login')" id="btn-login" class="flex-1 py-3.5 rounded-xl text-[10px] font-black transition-all tab-active uppercase tracking-widest">Login DB</button>
+                <button onclick="switchPortal('store')" id="btn-store" class="flex-1 py-3.5 rounded-xl text-[10px] font-black transition-all text-slate-500 uppercase tracking-widest hover:text-white">Store</button>
+            </div>
+
+            <div id="form-login" class="space-y-4">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-5 text-slate-500"><i class="fas fa-key"></i></div>
+                    <input type="text" id="k-input" class="w-full py-5 pl-12 pr-5 bg-[#0a0a0c] border border-slate-800 rounded-2xl text-center font-mono text-sm tracking-widest uppercase outline-none focus:border-blue-500 focus:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all text-white" placeholder="ENTER LICENSE...">
+                </div>
+                <button onclick="doLogin()" class="w-full elite-gradient text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-600/30 active:scale-95 transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-lock-open text-[10px]"></i> Unlock Database
+                </button>
+            </div>
+
+            <div id="form-store" class="hidden animate__animated animate__fadeIn space-y-4 text-center">
+                <div class="p-6 bg-[#0a0a0c] border border-slate-800 rounded-2xl mb-2">
+                    <i class="fas fa-shopping-bag text-3xl text-purple-500 mb-4"></i>
+                    <p class="text-[10px] text-slate-400 leading-relaxed font-bold">Masuk sebagai <b class="text-white">GUEST</b> untuk melihat katalog rahasia dan melakukan pembelian via Admin.</p>
+                </div>
+                <button onclick="enterAsGuest()" class="w-full bg-white text-black py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] active:scale-95 transition-all shadow-xl shadow-white/10">
+                    Explore Store
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden h-screen flex flex-col bg-[#030303] relative">
+        
+        <header class="glass-dark sticky top-0 z-[100] px-6 py-4 flex justify-between items-center rounded-b-3xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#050505] border border-slate-800 rounded-xl flex items-center justify-center text-blue-500"><i class="fas fa-terminal"></i></div>
+                <div>
+                    <h2 class="text-sm font-black tracking-tight text-white uppercase">V15<span class="text-blue-500">CLIENT</span></h2>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]"></span>
+                        <span id="status-user" class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Secured</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="showProfile()" class="w-10 h-10 bg-[#050505] border border-slate-800 rounded-xl flex items-center justify-center text-slate-400 active:scale-90 transition-transform"><i class="fas fa-fingerprint"></i></button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto custom-scroll pb-32">
+            
+            <div class="px-5 mt-6 mb-8">
+                <div class="elite-gradient rounded-[32px] p-6 relative overflow-hidden shadow-2xl shadow-blue-600/20">
+                    <div class="relative z-10">
+                        <span id="banner-tag" class="bg-white/20 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-md border border-white/20 mb-4 inline-block">GUEST MODE</span>
+                        <h3 class="text-2xl font-black text-white mb-1" id="welcome-name">Store Explorer</h3>
+                        <p class="text-blue-100 text-[10px] mb-6 opacity-80" id="welcome-sub">Pilih produk terbaik dari katalog kami.</p>
+                        
+                        <div class="flex gap-3">
+                            <div class="bg-black/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 flex-1">
+                                <p class="text-[7px] text-blue-200 uppercase font-bold mb-0.5 tracking-widest"><i class="fas fa-clock mr-1"></i> Time Left</p>
+                                <p id="timer-display" class="text-xs font-mono font-black text-white">UNLIMITED</p>
+                            </div>
+                            <div class="bg-black/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 flex-1">
+                                <p class="text-[7px] text-blue-200 uppercase font-bold mb-0.5 tracking-widest"><i class="fas fa-shield-alt mr-1"></i> Status</p>
+                                <p class="text-xs font-mono font-black text-green-400">ENCRYPTED</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-white opacity-5 rounded-full blur-2xl"></div>
+                    <i class="fas fa-globe absolute -right-6 -bottom-6 text-8xl text-white opacity-10"></i>
+                </div>
+            </div>
+
+            <div id="premium-area" class="hidden px-5 mb-10 animate__animated animate__fadeInUp">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-blue-900/30 text-blue-500 rounded-lg flex items-center justify-center border border-blue-500/20"><i class="fas fa-database text-xs"></i></div>
+                        <h4 class="text-xs font-black uppercase tracking-[0.1em] text-white">Decrypted Vault</h4>
+                    </div>
+                    <span id="data-count" class="bg-slate-900 text-blue-500 text-[10px] px-3 py-1 rounded-full font-bold border border-slate-800 font-mono">0 Data</span>
+                </div>
+                
+                <div id="drop-notif" class="hidden mb-4 bg-green-950/40 border border-green-500/30 p-3 rounded-xl flex items-center gap-3 animate__animated animate__headShake">
+                    <i class="fas fa-parachute-box text-green-500 text-lg"></i>
+                    <div>
+                        <p class="text-[10px] font-bold text-white uppercase tracking-widest">Auto-Drop Received!</p>
+                        <p class="text-[8px] text-green-400 font-mono">+1 Akun Uncheck masuk ke Vault.</p>
+                    </div>
+                </div>
+
+                <div class="bg-[#050505] border border-slate-800 rounded-[24px] p-4">
+                    <div id="inbox-list" class="space-y-3 max-h-[400px] overflow-y-auto custom-scroll pr-1">
+                        </div>
+                </div>
+            </div>
+
+            <div class="px-5 mb-6 flex items-center justify-between">
+                <h4 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Elite Store</h4>
+                <div class="h-px flex-1 bg-slate-800 mx-4"></div>
+            </div>
+            
+            <div id="store-grid" class="px-5 grid grid-cols-2 gap-4 pb-10">
+                </div>
+
+        </main>
+    </div>
+
+    <button onclick="toggleChat()" class="fixed bottom-8 right-6 w-14 h-14 elite-gradient rounded-full text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center z-[8000] active:scale-90 transition-transform">
+        <i class="fas fa-comment-dots text-xl"></i>
+        <span id="chat-notif" class="hidden absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-[#030303] rounded-full animate-bounce"></span>
+    </button>
+
+    <div id="chat-panel" class="fixed inset-0 z-[9000] bg-[#030303] translate-y-full transition-transform duration-500 ease-in-out flex flex-col">
+        <div class="glass-dark px-6 py-6 flex justify-between items-center border-b border-slate-800">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-900/30 text-blue-500 border border-blue-500/20 rounded-2xl flex items-center justify-center text-lg"><i class="fas fa-headset"></i></div>
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-widest">Admin Support</h3>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <p class="text-[9px] text-green-500 font-bold uppercase tracking-widest">Online</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="w-10 h-10 bg-[#0a0a0c] border border-slate-800 rounded-xl text-slate-400 flex items-center justify-center active:scale-90"><i class="fas fa-chevron-down"></i></button>
+        </div>
+        
+        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll bg-[#050505]">
+            <div class="text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-6">Pesan dienkripsi End-to-End</div>
+            </div>
+        
+        <div class="p-6 bg-[#0a0a0c] border-t border-slate-800 flex gap-3">
+            <input type="text" id="chat-input" class="flex-1 bg-[#050505] border border-slate-800 rounded-2xl px-5 py-4 text-xs text-white outline-none focus:border-blue-500 transition-all" placeholder="Ketik pesan rahasia..." onkeypress="if(event.key==='Enter') sendMsg()">
+            <button onclick="sendMsg()" class="w-14 h-14 elite-gradient text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, update, push, onDisconnect } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        // INIT DB
+        const app = initializeApp({ databaseURL: "https://kodangz-default-rtdb.firebaseio.com" });
+        const db = getDatabase(app);
+
+        // DEVICE ID LOGIC
+        const myID = localStorage.getItem('v15_id') || 'DEV-' + Math.random().toString(36).substr(2,6).toUpperCase();
+        localStorage.setItem('v15_id', myID);
+        document.getElementById('hwid-display').innerText = myID;
+
+        let IS_PREMIUM = false;
+        let CURRENT_KEY = null;
+        let dropInterval = null; // Variable for 5-min drops
+
+        // PORTAL UI SWITCH
+        window.switchPortal = (type) => {
+            const bLog = document.getElementById('btn-login'), bStore = document.getElementById('btn-store'),
+                  fLog = document.getElementById('form-login'), fStore = document.getElementById('form-store');
+            
+            if(type === 'login') {
+                bLog.classList.add('tab-active'); bLog.classList.remove('text-slate-500');
+                bStore.classList.remove('tab-active'); bStore.classList.add('text-slate-500');
+                fLog.classList.remove('hidden'); fStore.classList.add('hidden');
+            } else {
+                bStore.classList.add('tab-active'); bStore.classList.remove('text-slate-500');
+                bLog.classList.remove('tab-active'); bLog.classList.add('text-slate-500');
+                fStore.classList.remove('hidden'); fLog.classList.add('hidden');
+            }
+        };
+
+        // PRESENCE & BAN CHECK
+        const deviceRef = ref(db, `devices/${myID}`);
+        function updatePresence(status) {
+            update(deviceRef, { online: true, lastSeen: Date.now(), status, deviceInfo: navigator.userAgent.split(')')[0].split('(')[1] || 'Mobile' });
+            onDisconnect(deviceRef).update({ online: false, lastSeen: Date.now() });
+        }
+
+        onValue(ref(db, `devices/${myID}/suspend`), s => {
+            if(s.exists() && s.val() === true) {
+                Swal.fire({ title: 'ACCESS DENIED', text: 'Device ini telah di-Ban oleh Administrator.', icon: 'error', background: '#0a0a0c', color: '#fff', allowOutsideClick: false }).then(() => location.reload());
+            }
+        });
+
+        // ==========================================
+        // AUTO DROP 5 MENIT (Fitur Utama BroJJ)
+        // ==========================================
+        function startAutoDrop() {
+            if(!IS_PREMIUM || !CURRENT_KEY) return;
+            
+            // Interval 300,000 ms (5 Menit)
+            dropInterval = setInterval(async () => {
+                const rStr = Math.random().toString(36).substr(2,6);
+                const uncheckAcc = {
+                    email: `uncheck_${rStr}@yahoo.com`,
+                    pw: `pass${Math.floor(Math.random()*9999)}`,
+                    label: 'DROP_5MIN'
+                };
+                
+                // Push ke Database di dalam Key
+                await push(ref(db, `keys/${CURRENT_KEY}/inbox`), uncheckAcc);
+                
+                // Tampilkan Notifikasi Mini di UI
+                const notif = document.getElementById('drop-notif');
+                notif.classList.remove('hidden');
+                setTimeout(() => { notif.classList.add('hidden'); }, 4000);
+                
+            }, 300000); // <-- 300000 ms = 5 Menit persis.
+        }
+
+        // ==========================================
+        // AUTHENTICATION LOGIC
+        // ==========================================
+        window.enterAsGuest = () => { initApp(null, 'GUEST'); };
+
+        window.doLogin = async () => {
+            const k = document.getElementById('k-input').value.trim().toUpperCase();
+            if(!k) return;
+            
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            
+            try {
+                const snap = await get(ref(db, `keys/${k}`));
+                if(!snap.exists()) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    return Swal.fire({title:'Error', text:'License tidak ditemukan.', icon:'error', background:'#0a0a0c', color:'#fff'});
+                }
+                
+                const d = snap.val();
+                // Check Device Binding
+                if(d.deviceID && d.deviceID !== myID) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    return Swal.fire({title:'Bound Error', text:'License terikat dengan Device lain.', icon:'error', background:'#0a0a0c', color:'#fff'});
+                }
+
+                // Hitung Expire
+                let exp = d.expiresAt || (Date.now() + d.durationMS);
+                if(Date.now() > exp) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    return Swal.fire({title:'Expired', text:'License sudah habis waktu.', icon:'error', background:'#0a0a0c', color:'#fff'});
+                }
+
+                IS_PREMIUM = true;
+                CURRENT_KEY = k;
+                
+                // Update Key DB
+                await update(ref(db, `keys/${k}`), { status: 'in-use', expiresAt: exp, deviceID: myID });
+                initApp(exp, 'PREMIUM');
+
+                // Listener Inbox Realtime (termasuk hasil drop 5 menit)
+                onValue(ref(db, `keys/${k}/inbox`), s => {
+                    const list = document.getElementById('inbox-list'); list.innerHTML = '';
+                    if(!s.exists()) return;
+                    
+                    const dataObj = s.val();
+                    const keysArray = Object.keys(dataObj).reverse(); // Yang terbaru di atas
+                    
+                    document.getElementById('data-count').innerText = keysArray.length + ' Data';
+                    
+                    // Render max 100 data agar tidak lag di HP, tapi aslinya ada ratusan/ribuan di DB
+                    const maxRender = keysArray.length > 100 ? 100 : keysArray.length;
+                    
+                    for(let i=0; i<maxRender; i++) {
+                        const a = dataObj[keysArray[i]];
+                        const isDrop = a.label === 'DROP_5MIN';
+                        const bgIcon = isDrop ? 'bg-green-900/30 text-green-500 border-green-500/30' : 'bg-slate-900 text-blue-500 border-slate-800';
+                        
+                        list.innerHTML += `
+                            <div class="p-3 bg-[#0a0a0c] border border-slate-800/80 rounded-xl flex items-center justify-between hover:border-blue-500 transition-colors">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="w-10 h-10 ${bgIcon} border rounded-xl flex items-center justify-center font-black">${isDrop ? '<i class="fas fa-box-open"></i>' : a.label[0]}</div>
+                                    <div class="truncate">
+                                        <h5 class="text-[11px] font-bold text-white truncate font-mono">${a.email}</h5>
+                                        <p class="text-[8px] text-slate-500 font-black uppercase mt-0.5 tracking-widest">${a.label}</p>
+                                    </div>
+                                </div>
+                                <button onclick="copyAcc('${a.email}','${a.pw}')" class="px-3 py-1.5 bg-blue-600/10 text-blue-500 rounded-lg text-[9px] font-black uppercase tracking-widest border border-blue-500/20 active:scale-90 shrink-0">Open</button>
+                            </div>`;
+                    }
+                    if(keysArray.length > 100) {
+                        list.innerHTML += `<div class="text-center text-[9px] text-slate-500 py-2">... dan ${keysArray.length - 100} data lainnya disembunyikan utk performa.</div>`;
+                    }
+                });
+
+                // Mulai timer drop 5 menit
+                startAutoDrop();
+
+            } catch(e) { document.getElementById('loading-overlay').classList.add('hidden'); }
+        };
+
+        function initApp(exp, type) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('loading-overlay').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            updatePresence(type);
+
+            if(type === 'PREMIUM') {
+                document.getElementById('status-user').innerText = 'VIP MEMBER';
+                document.getElementById('status-user').classList.replace('text-slate-500', 'text-blue-500');
+                
+                document.getElementById('banner-tag').innerText = "PREMIUM ACCESS";
+                document.getElementById('banner-tag').classList.replace('bg-white/20', 'bg-blue-500/90');
+                
+                document.getElementById('welcome-name').innerText = 'Welcome, Elite!';
+                document.getElementById('welcome-sub').innerText = 'Akses penuh ke database berhasil dibuka.';
+                document.getElementById('premium-area').classList.remove('hidden');
+                
+                // Timer Logic
+                setInterval(() => {
+                    const diff = exp - Date.now();
+                    if(diff <= 0) location.reload();
+                    const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+                    const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+                    const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+                    document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
+                }, 1000);
+            }
+        }
+
+        // Copy Account Details
+        window.copyAcc = (e,p) => {
+            Swal.fire({
+                title: 'CREDENTIALS',
+                html: `
+                <div class="text-left text-xs space-y-4 font-mono mt-2">
+                    <div class="bg-[#050505] border border-slate-800 p-4 rounded-xl relative">
+                        <p class="text-[9px] text-slate-500 uppercase font-black absolute -top-2 bg-[#050505] px-2">EMAIL / USERNAME</p>
+                        <div class="text-blue-400 select-all font-bold break-all">${e}</div>
+                    </div>
+                    <div class="bg-[#050505] border border-slate-800 p-4 rounded-xl relative">
+                        <p class="text-[9px] text-slate-500 uppercase font-black absolute -top-2 bg-[#050505] px-2">PASSWORD</p>
+                        <div class="text-red-400 select-all font-bold break-all">${p}</div>
+                    </div>
+                </div>`,
+                background: '#0a0a0c', color: '#fff', showConfirmButton: false
+            });
+        };
+
+        // STORE SYSTEM (GUEST & PREMIUM)
+        onValue(ref(db, 'products'), s => {
+            const grid = document.getElementById('store-grid'); grid.innerHTML = '';
+            if(s.exists()) {
+                Object.values(s.val()).forEach(p => {
+                    // Script Order WA sesuai request
+                    const waNum = "6283821914043"; 
+                    const text = encodeURIComponent(`SYSTEM AUTO-OPER V15\n\nHalo Admin BroJJ, saya ingin order:\n🛒 *${p.name}*\n💰 Rp ${p.price.toLocaleString()}\n\nID Pembeli: ${myID}\nStatus: ${IS_PREMIUM ? 'Premium' : 'Guest'}\n\nMohon instruksi pembayarannya.`);
+                    const waLink = `https://wa.me/${waNum}?text=${text}`;
+
+                    grid.innerHTML += `
+                        <div class="product-card p-3 flex flex-col relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-2"><span class="bg-blue-600 text-white text-[8px] px-2 py-0.5 rounded font-bold uppercase shadow-lg">New</span></div>
+                            <div class="w-full h-28 bg-[#030303] rounded-xl mb-3 overflow-hidden border border-slate-800/50">
+                                <img src="${p.image}" class="w-full h-full object-cover opacity-70" onerror="this.src='https://via.placeholder.com/200?text=V15+STORE'">
+                            </div>
+                            <span class="text-[8px] font-black text-purple-500 uppercase tracking-widest mb-1">${p.category}</span>
+                            <h5 class="text-[11px] font-bold text-white leading-tight mb-2 flex-1">${p.name}</h5>
+                            <div class="flex items-end justify-between mt-auto border-t border-slate-800/50 pt-2">
+                                <p class="text-[10px] font-mono text-slate-300 font-bold">Rp ${p.price.toLocaleString()}</p>
+                                <button onclick="window.open('${waLink}', '_blank')" class="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center text-[10px] shadow-lg active:scale-90 transition-transform"><i class="fas fa-shopping-cart"></i></button>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                grid.innerHTML = `<div class="col-span-2 text-center text-[10px] text-slate-500 py-10 uppercase font-bold tracking-widest">Store Kosong</div>`;
+            }
+        });
+
+        // ==========================================
+        // FLOATING LIVE CHAT SYSTEM
+        // ==========================================
+        window.toggleChat = () => { 
+            document.getElementById('chat-panel').classList.toggle('chat-open'); 
+            document.getElementById('chat-notif').classList.add('hidden'); 
+        };
+        
+        window.sendMsg = () => {
+            const i = document.getElementById('chat-input');
+            if(i.value.trim()){ 
+                push(ref(db, `chats/${myID}`), {sender:'user', text:i.value.trim(), time:Date.now()}); 
+                i.value=''; 
+            }
+        };
+
+        onValue(ref(db, `chats/${myID}`), s => {
+            const b = document.getElementById('chat-box'); 
+            b.innerHTML = '<div class="text-center text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-6">Pesan dienkripsi End-to-End</div>';
+            if(s.exists()){
+                Object.values(s.val()).forEach(m => {
+                    const isMe = m.sender === 'user';
+                    b.innerHTML += `
+                    <div class="flex w-full ${isMe?'justify-end':'justify-start'} mb-4">
+                        <div class="max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-lg ${isMe?'elite-gradient text-white rounded-br-sm':'bg-[#0a0a0c] text-slate-300 rounded-bl-sm border border-slate-800'}">${m.text}</div>
+                    </div>`;
+                    
+                    // Munculin notif dot merah kalau chat ditutup
+                    if(!isMe && !document.getElementById('chat-panel').classList.contains('chat-open')) {
+                        document.getElementById('chat-notif').classList.remove('hidden');
+                        if(navigator.vibrate) navigator.vibrate(200);
+                    }
+                });
+                b.scrollTop = b.scrollHeight;
+            }
+        });
+
+        // PROFILE POPUP
+        window.showProfile = () => {
+            Swal.fire({
+                background: '#0a0a0c', color: '#fff', showConfirmButton: false,
+                html: `
+                <div class="text-center p-2">
+                    <div class="w-16 h-16 bg-[#050505] border border-slate-800 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl text-slate-400 shadow-xl"><i class="fas fa-user-secret"></i></div>
+                    <h3 class="font-black text-lg mb-1 tracking-tight">${IS_PREMIUM ? 'VIP USER' : 'GUEST'}</h3>
+                    <p class="text-[10px] text-slate-500 font-mono mb-6">${myID}</p>
+                    
+                    <div class="space-y-2 mb-6 text-left">
+                        <div class="bg-[#050505] border border-slate-800 p-3 rounded-xl flex justify-between items-center text-[9px] uppercase font-bold tracking-widest"><span class="text-slate-500">Auto-Drop</span><span class="${IS_PREMIUM?'text-green-500':'text-red-500'}">${IS_PREMIUM?'Active (5m)':'Disabled'}</span></div>
+                        <div class="bg-[#050505] border border-slate-800 p-3 rounded-xl flex justify-between items-center text-[9px] uppercase font-bold tracking-widest"><span class="text-slate-500">Security</span><span class="text-green-500">Encrypted</span></div>
+                    </div>
+                    
+                    <button onclick="location.reload()" class="w-full py-4 bg-red-950/40 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-red-500/20 hover:bg-red-600 hover:text-white transition-colors">Terminate Session</button>
+                </div>`
+            });
+        };
+
+        // Anti-Inspect / Anti F12 (Opsional sesuai req sebelumnya)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
